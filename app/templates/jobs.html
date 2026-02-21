@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Browse Jobs — TalentAI{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Browse <span class="gradient-text">Jobs</span></h1>
+    <p class="page-subtitle">Find your next opportunity and instantly check your match</p>
+</div>
+
+<div class="jobs-container container">
+    <div class="jobs-filter glass">
+        <input type="text" id="jobSearch" class="job-search-input" placeholder="🔍 Search jobs, skills, companies...">
+    </div>
+
+    <div class="jobs-grid" id="jobsGrid">
+        {% for job in jobs %}
+        <div class="job-card glass" data-job-id="{{ job.id }}">
+            <div class="job-header">
+                <div class="job-title-wrap">
+                    <h3 class="job-title">{{ job.title }}</h3>
+                    <span class="job-type">{{ job.type }}</span>
+                </div>
+                <div class="company-badge">
+                    <div class="company-avatar">{{ job.company[0] }}</div>
+                    <div>
+                        <p class="company-name">{{ job.company }}</p>
+                        <p class="job-location">📍 {{ job.location }}</p>
+                    </div>
+                </div>
+            </div>
+            <p class="job-excerpt">{{ job.description[:200] }}...</p>
+            <div class="job-tags">
+                {% for tag in job.tags %}
+                <span class="tag">{{ tag }}</span>
+                {% endfor %}
+            </div>
+            <div class="job-actions">
+                <button class="btn btn-primary btn-sm" onclick="applyToJob({{ job.id }})">
+                    Match & Apply
+                </button>
+                <button class="btn btn-ghost btn-sm" onclick="viewJob({{ job.id }})">
+                    View Details
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Job Detail Modal -->
+<div class="modal-overlay" id="jobModal" style="display:none;">
+    <div class="modal glass" id="jobModalContent">
+        <button class="modal-close" onclick="closeModal()">✕</button>
+        <div id="modalBody"></div>
+        <div class="modal-actions">
+            <button class="btn btn-primary" id="modalApplyBtn">Match This Job →</button>
+            <button class="btn btn-ghost" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/jobs.js"></script>
+{% endblock %}

@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% block title %}TalentAI — AI-Powered Resume Matching{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-content">
+        <div class="hero-badge">
+            <span class="badge-dot"></span>
+            Powered by Claude AI + ML
+        </div>
+        <h1 class="hero-title">
+            Match Your Resume<br>
+            <span class="gradient-text">With AI Precision</span>
+        </h1>
+        <p class="hero-subtitle">
+            Upload your resume, paste a job description, and get instant AI-powered analysis. 
+            Know your match score, skill gaps, and how to improve before you apply.
+        </p>
+        <div class="hero-actions">
+            <a href="/match/" class="btn btn-primary btn-lg">
+                <span>Analyze My Resume</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+            <a href="/jobs/" class="btn btn-ghost btn-lg">Browse Jobs</a>
+        </div>
+        <div class="hero-stats">
+            <div class="stat">
+                <span class="stat-num">94%</span>
+                <span class="stat-label">Accuracy</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat">
+                <span class="stat-num">3-Layer</span>
+                <span class="stat-label">AI Analysis</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat">
+                <span class="stat-num">10s</span>
+                <span class="stat-label">Analysis Time</span>
+            </div>
+        </div>
+    </div>
+    <div class="hero-visual">
+        <div class="score-card-demo">
+            <div class="demo-header">
+                <div class="demo-dots">
+                    <span></span><span></span><span></span>
+                </div>
+                <span class="demo-title">Resume Analysis</span>
+            </div>
+            <div class="demo-score">
+                <svg class="score-ring-demo" viewBox="0 0 120 120">
+                    <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="8"/>
+                    <circle cx="60" cy="60" r="50" fill="none" stroke="url(#grad)" stroke-width="8"
+                        stroke-dasharray="251" stroke-dashoffset="62" stroke-linecap="round"
+                        transform="rotate(-90 60 60)"/>
+                    <defs>
+                        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#7c3aed"/>
+                            <stop offset="100%" style="stop-color:#00d4ff"/>
+                        </linearGradient>
+                    </defs>
+                    <text x="60" y="55" text-anchor="middle" fill="white" font-size="22" font-weight="700">78%</text>
+                    <text x="60" y="72" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="8">Match Score</text>
+                </svg>
+            </div>
+            <div class="demo-pills">
+                <div class="demo-section">
+                    <span class="demo-label">✅ Matched Skills</span>
+                    <div class="pill-row">
+                        <span class="pill pill-green">Python</span>
+                        <span class="pill pill-green">ML</span>
+                        <span class="pill pill-green">SQL</span>
+                        <span class="pill pill-green">NLP</span>
+                    </div>
+                </div>
+                <div class="demo-section">
+                    <span class="demo-label">⚠️ Missing Skills</span>
+                    <div class="pill-row">
+                        <span class="pill pill-red">Docker</span>
+                        <span class="pill pill-red">AWS</span>
+                        <span class="pill pill-red">CI/CD</span>
+                    </div>
+                </div>
+            </div>
+            <div class="demo-probability">
+                <span class="prob-label">Shortlisting Probability</span>
+                <span class="prob-badge high">High</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="features">
+    <div class="container">
+        <h2 class="section-title">How It Works</h2>
+        <p class="section-subtitle">A 4-layer AI system for the most accurate resume matching</p>
+        
+        <div class="steps-grid">
+            <div class="step-card glass">
+                <!-- <div class="step-num">01</div> -->
+                <div class="step-icon">📄</div>
+                <h3>Upload Resume</h3>
+                <p>Upload PDF, DOCX, or TXT. Our parser extracts skills, experience, education and certifications automatically.</p>
+            </div>
+            <div class="step-card glass">
+                <!-- <div class="step-num">02</div> -->
+                <div class="step-icon">🔍</div>
+                <h3>Paste Job Description</h3>
+                <p>Paste any job description. NLP extracts required skills, responsibilities, and experience requirements.</p>
+            </div>
+            <div class="step-card glass">
+                <!-- <div class="step-num">03</div> -->
+                <div class="step-icon">🧠</div>
+                <h3>AI Analysis</h3>
+                <p>TF-IDF, cosine similarity, ML model, and Claude AI evaluate your fit from multiple angles.</p>
+            </div>
+            <div class="step-card glass">
+                <!-- <div class="step-num">04</div> -->
+                <div class="step-icon">📊</div>
+                <h3>Get Results</h3>
+                <p>Receive a match score, ATS score, skill gap analysis, and actionable improvement suggestions.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="tech-section">
+    <div class="container">
+        <h2 class="section-title">Powered By</h2>
+        <div class="tech-grid">
+            <div class="tech-item glass">
+                <span class="tech-emoji">🐍</span>
+                <span>Python + Flask</span>
+            </div>
+            <div class="tech-item glass">
+                <span class="tech-emoji">🤖</span>
+                <span>Claude AI</span>
+            </div>
+            <div class="tech-item glass">
+                <span class="tech-emoji">📊</span>
+                <span>Scikit-learn</span>
+            </div>
+            <div class="tech-item glass">
+                <span class="tech-emoji">💬</span>
+                <span>spaCy + NLTK</span>
+            </div>
+            <div class="tech-item glass">
+                <span class="tech-emoji">🧪</span>
+                <span>MLflow</span>
+            </div>
+            <div class="tech-item glass">
+                <span class="tech-emoji">🐳</span>
+                <span>Docker</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-card glass">
+            <h2>Ready to Check Your Fit?</h2>
+            <p>Get your resume analyzed in seconds. No signup required.</p>
+            <a href="/match/" class="btn btn-primary btn-lg">Start Analysis →</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

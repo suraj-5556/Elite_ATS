@@ -1,0 +1,13 @@
+{
+  "cv_accuracy": 0.998,
+  "cv_std": 0.00244948974278318,
+  "features": [
+    "skill_overlap",
+    "tfidf_similarity",
+    "keyword_density",
+    "experience_match",
+    "ats_score_norm"
+  ],
+  "model_type": "GradientBoosting",
+  "training_samples": 1000
+}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Match Results — TalentAI{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Analysis <span class="gradient-text">Results</span></h1>
+    <p class="page-subtitle">Your AI-powered resume match report</p>
+</div>
+
+<div class="results-container container" id="resultsContainer">
+    <div class="no-results glass" id="noResults">
+        <div class="no-results-icon">🔍</div>
+        <h3>No Results Yet</h3>
+        <p>Head to the Match page to analyze your resume</p>
+        <a href="/match/" class="btn btn-primary">Analyze Resume</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/results.js"></script>
+{% endblock %}
