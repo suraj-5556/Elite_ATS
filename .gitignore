@@ -9,8 +9,7 @@ dist/
 build/
 *.egg
 .eggs/
-
-# Virtual environments
+.\.env.example# Virtual environments
 venv/
 env/
 .venv/
