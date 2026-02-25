@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Browse Jobs{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Open Positions</h1>
+    <p class="page-subtitle">{{ jobs|length }} opportunities available</p>
+  </div>
+  <div class="search-bar">
+    <input type="text" id="jobSearch" placeholder="🔍 Search jobs, skills, companies..." />
+  </div>
+</div>
+
+<div class="jobs-grid" id="jobsGrid">
+  {% for job in jobs %}
+  <div class="job-card" data-title="{{ job.title.lower() }}" data-tags="{{ job.tags|join(' ')|lower }}" data-company="{{ job.company.lower() }}">
+    <div class="job-card-header">
+      <div class="company-logo">{{ job.company[0] }}</div>
+      <div class="job-meta">
+        <div class="job-title">{{ job.title }}</div>
+        <div class="job-company">{{ job.company }}</div>
+      </div>
+      <span class="job-type-badge {% if job.type == 'Full-time' %}badge-blue{% else %}badge-purple{% endif %}">
+        {{ job.type }}
+      </span>
+    </div>
+
+    <div class="job-details">
+      <span class="job-detail">📍 {{ job.location }}</span>
+      <span class="job-detail">💰 {{ job.salary }}</span>
+    </div>
+
+    <p class="job-description">{{ job.description[:140] }}…</p>
+
+    <div class="job-tags">
+      {% for tag in job.tags %}
+        <span class="tag">{{ tag }}</span>
+      {% endfor %}
+    </div>
+
+    <div class="job-card-footer">
+      <a href="{{ url_for('match.index') }}?jd={{ job.jd | urlencode }}" class="btn btn-primary btn-sm">
+        🤖 Match My Resume
+      </a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<div id="noJobsMsg" class="empty-state" style="display:none">
+  <div class="empty-icon">🔍</div>
+  <h3>No jobs found</h3>
+  <p>Try different search terms</p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const searchInput = document.getElementById('jobSearch');
+  const grid = document.getElementById('jobsGrid');
+  const noMsg = document.getElementById('noJobsMsg');
+
+  searchInput.addEventListener('input', () => {
+    const query = searchInput.value.toLowerCase();
+    let visible = 0;
+    grid.querySelectorAll('.job-card').forEach(card => {
+      const match = card.dataset.title.includes(query) ||
+                    card.dataset.tags.includes(query) ||
+                    card.dataset.company.includes(query);
+      card.style.display = match ? '' : 'none';
+      if (match) visible++;
+    });
+    noMsg.style.display = visible === 0 ? 'flex' : 'none';
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}My Resumes{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>My Resumes</h1>
+    <p class="page-subtitle">All your resume analyses ({{ resumes|length }} total)</p>
+  </div>
+  <a href="{{ url_for('match.index') }}" class="btn btn-primary">+ New Analysis</a>
+</div>
+
+{% if resumes %}
+<div class="resume-grid">
+  {% for r in resumes %}
+  <div class="resume-card">
+    <div class="resume-card-header">
+      <div class="resume-icon">📄</div>
+      <div class="resume-meta">
+        <div class="resume-filename">{{ r.filename[:30] }}{% if r.filename|length > 30 %}…{% endif %}</div>
+        <div class="resume-date">
+          {% if r.uploaded_at %}{{ r.uploaded_at.strftime('%B %d, %Y') }}{% endif %}
+        </div>
+      </div>
+      <div class="score-ring {% if r.final_score >= 70 %}ring-high{% elif r.final_score >= 50 %}ring-mid{% else %}ring-low{% endif %}">
+        {{ r.final_score|round(0)|int }}%
+      </div>
+    </div>
+
+    <div class="score-breakdown">
+      <div class="score-item">
+        <span class="score-label">NLP</span>
+        <div class="score-bar-wrap">
+          <div class="score-bar" style="width:{{ r.nlp_score }}%; background:#06b6d4"></div>
+        </div>
+        <span class="score-num">{{ r.nlp_score|round(1) }}</span>
+      </div>
+      <div class="score-item">
+        <span class="score-label">ML</span>
+        <div class="score-bar-wrap">
+          <div class="score-bar" style="width:{{ r.ml_score }}%; background:#10b981"></div>
+        </div>
+        <span class="score-num">{{ r.ml_score|round(1) }}</span>
+      </div>
+      <div class="score-item">
+        <span class="score-label">AI</span>
+        <div class="score-bar-wrap">
+          <div class="score-bar" style="width:{{ r.claude_score }}%; background:#f59e0b"></div>
+        </div>
+        <span class="score-num">{{ r.claude_score|round(1) }}</span>
+      </div>
+      <div class="score-item">
+        <span class="score-label">ATS</span>
+        <div class="score-bar-wrap">
+          <div class="score-bar" style="width:{{ r.ats_score }}%; background:#8b5cf6"></div>
+        </div>
+        <span class="score-num">{{ r.ats_score|round(1) }}</span>
+      </div>
+    </div>
+
+    <div class="resume-card-footer">
+      <span class="badge {% if r.shortlisting_probability >= 0.6 %}badge-success{% elif r.shortlisting_probability >= 0.4 %}badge-warning{% else %}badge-danger{% endif %}">
+        {% if r.shortlisting_probability >= 0.6 %}Shortlist Likely{% elif r.shortlisting_probability >= 0.4 %}Possible{% else %}Needs Work{% endif %}
+      </span>
+      <div class="card-actions">
+        <a href="{{ url_for('match.results', resume_id=r._id) }}" class="btn btn-sm btn-primary">Details</a>
+        <form method="POST" action="{{ url_for('dashboard.delete_resume', resume_id=r._id) }}"
+              onsubmit="return confirm('Delete this analysis?')" style="display:inline">
+          <button type="submit" class="btn btn-sm btn-danger-ghost">🗑</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state card">
+  <div class="empty-icon">📭</div>
+  <h3>No resumes analyzed yet</h3>
+  <p>Start by uploading your resume and a job description</p>
+  <a href="{{ url_for('match.index') }}" class="btn btn-primary">Analyze My Resume</a>
+</div>
+{% endif %}
+{% endblock %}

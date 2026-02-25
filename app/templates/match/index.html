@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}AI Resume Match{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>🤖 AI Resume Matcher</h1>
+    <p class="page-subtitle">Upload your resume and paste a job description for instant AI analysis</p>
+  </div>
+</div>
+
+<div class="match-layout">
+  <!-- Upload Form -->
+  <div class="card upload-card">
+    <div class="card-header">
+      <h2>Upload & Analyze</h2>
+      <span class="badge badge-blue">3-model AI pipeline</span>
+    </div>
+    <div class="card-body">
+      <form id="matchForm" method="POST" action="{{ url_for('match.analyze') }}" enctype="multipart/form-data" novalidate>
+
+        <!-- File Upload Zone -->
+        <div class="upload-zone" id="uploadZone">
+          <input type="file" id="resumeFile" name="resume" accept=".pdf,.docx,.txt" hidden required />
+          <div class="upload-icon">📄</div>
+          <div class="upload-text">
+            <strong>Drag & drop your resume</strong>
+            <p>or <button type="button" onclick="document.getElementById('resumeFile').click()" class="link-btn">browse files</button></p>
+            <small>PDF, DOCX, TXT · Max 10MB</small>
+          </div>
+          <div class="upload-preview" id="uploadPreview" style="display:none">
+            <span class="preview-icon">✅</span>
+            <span id="previewName"></span>
+            <span id="previewSize" class="preview-size"></span>
+          </div>
+        </div>
+        <span class="field-error" id="fileError"></span>
+
+        <!-- Job Description -->
+        <div class="form-group" style="margin-top:1.5rem">
+          <label for="job_description">
+            Job Description
+            <span class="label-hint">Paste the full JD for best results</span>
+          </label>
+          <textarea
+            id="job_description"
+            name="job_description"
+            rows="10"
+            placeholder="Paste the job description here...
+
+Example:
+Senior Python Engineer with 5+ years experience in Flask, REST APIs, MongoDB, Docker, AWS. Must have strong problem-solving skills and experience in Agile environments..."
+            required
+            minlength="50"
+          >{{ request.args.get('jd', '') }}</textarea>
+          <div class="char-counter"><span id="jdCharCount">0</span> characters</div>
+          <span class="field-error" id="jdError"></span>
+        </div>
+
+        <!-- Progress Bar (hidden until submit) -->
+        <div class="upload-progress" id="uploadProgress" style="display:none">
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <div class="progress-steps" id="progressSteps">
+            <span class="step" data-step="1">📄 Parsing resume...</span>
+            <span class="step" data-step="2">🧮 NLP analysis...</span>
+            <span class="step" data-step="3">🤖 ML scoring...</span>
+            <span class="step" data-step="4">✨ Claude AI evaluation...</span>
+            <span class="step" data-step="5">📊 Generating report...</span>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full btn-large" id="analyzeBtn">
+          <span class="btn-text">🚀 Analyze Resume</span>
+          <span class="btn-loader" style="display:none">⏳ Analyzing... (30-60 seconds)</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Info Panel -->
+  <div class="info-panel">
+    <div class="card">
+      <div class="card-header"><h3>🔬 How It Works</h3></div>
+      <div class="card-body">
+        <div class="pipeline-steps">
+          <div class="pipeline-step">
+            <div class="step-number">1</div>
+            <div class="step-content">
+              <strong>Resume Parser</strong>
+              <p>Extracts text from PDF/DOCX/TXT using PyMuPDF & python-docx</p>
+            </div>
+          </div>
+          <div class="pipeline-step">
+            <div class="step-number">2</div>
+            <div class="step-content">
+              <strong>NLP Score (35%)</strong>
+              <p>TF-IDF cosine similarity between resume and job description</p>
+            </div>
+          </div>
+          <div class="pipeline-step">
+            <div class="step-number">3</div>
+            <div class="step-content">
+              <strong>ML Score (30%)</strong>
+              <p>Gradient Boosting model on 7 hand-crafted resume features</p>
+            </div>
+          </div>
+          <div class="pipeline-step">
+            <div class="step-number">4</div>
+            <div class="step-content">
+              <strong>Claude AI (35%)</strong>
+              <p>Deep semantic evaluation by Anthropic Claude</p>
+            </div>
+          </div>
+          <div class="pipeline-step last">
+            <div class="step-number">✓</div>
+            <div class="step-content">
+              <strong>Final Score</strong>
+              <p>Composite score + ATS check + improvement suggestions</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:1rem">
+      <div class="card-header"><h3>💡 Tips for Best Results</h3></div>
+      <div class="card-body tips-list">
+        <p>✅ Use the <strong>full text</strong> of the job description</p>
+        <p>✅ Upload a <strong>text-based PDF</strong> (not scanned image)</p>
+        <p>✅ Include your <strong>skills, experience & projects</strong></p>
+        <p>✅ Paste descriptions with <strong>50+ words</strong></p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/match.js') }}"></script>
+{% endblock %}

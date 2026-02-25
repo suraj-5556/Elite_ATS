@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% block title %}Analysis Results{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Analysis Results</h1>
+    <p class="page-subtitle">{{ resume.filename }} · {{ resume.uploaded_at.strftime('%B %d, %Y at %H:%M') if resume.uploaded_at else '' }}</p>
+  </div>
+  <div class="header-actions">
+    <a href="{{ url_for('match.index') }}" class="btn btn-ghost">← New Analysis</a>
+    <a href="{{ url_for('dashboard.index') }}" class="btn btn-primary">View Dashboard</a>
+  </div>
+</div>
+
+<!-- Hero Score Card -->
+<div class="score-hero {% if resume.final_score >= 70 %}hero-high{% elif resume.final_score >= 50 %}hero-mid{% else %}hero-low{% endif %}">
+  <div class="score-hero-left">
+    <div class="big-score">{{ resume.final_score|round(1) }}%</div>
+    <div class="score-label-main">Overall Match Score</div>
+    <div class="shortlist-badge {% if resume.shortlisting_probability >= 0.6 %}prob-high{% elif resume.shortlisting_probability >= 0.4 %}prob-mid{% else %}prob-low{% endif %}">
+      {% if resume.shortlisting_probability >= 0.6 %}
+        ✅ Strong Shortlist Candidate ({{ (resume.shortlisting_probability * 100)|round(0)|int }}% probability)
+      {% elif resume.shortlisting_probability >= 0.4 %}
+        ⚠️ Possible Candidate ({{ (resume.shortlisting_probability * 100)|round(0)|int }}% probability)
+      {% else %}
+        ❌ Needs Improvement ({{ (resume.shortlisting_probability * 100)|round(0)|int }}% probability)
+      {% endif %}
+    </div>
+    {% if resume.shortlisting_rationale %}
+    <p class="rationale">{{ resume.shortlisting_rationale }}</p>
+    {% endif %}
+  </div>
+
+  <div class="score-hero-right">
+    <div class="score-gauges">
+      <div class="gauge-item">
+        <div class="gauge-circle" style="--pct:{{ resume.nlp_score }}; --color:#06b6d4">
+          <span>{{ resume.nlp_score|round(0)|int }}%</span>
+        </div>
+        <div class="gauge-label">NLP Score<br><small>TF-IDF Similarity (35%)</small></div>
+      </div>
+      <div class="gauge-item">
+        <div class="gauge-circle" style="--pct:{{ resume.ml_score }}; --color:#10b981">
+          <span>{{ resume.ml_score|round(0)|int }}%</span>
+        </div>
+        <div class="gauge-label">ML Score<br><small>Gradient Boosting (30%)</small></div>
+      </div>
+      <div class="gauge-item">
+        <div class="gauge-circle" style="--pct:{{ resume.claude_score }}; --color:#f59e0b">
+          <span>{{ resume.claude_score|round(0)|int }}%</span>
+        </div>
+        <div class="gauge-label">AI Score<br><small>Claude Evaluation (35%)</small></div>
+      </div>
+      <div class="gauge-item">
+        <div class="gauge-circle" style="--pct:{{ resume.ats_score }}; --color:#8b5cf6">
+          <span>{{ resume.ats_score|round(0)|int }}%</span>
+        </div>
+        <div class="gauge-label">ATS Score<br><small>Keyword Match</small></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Score Formula Breakdown -->
+<div class="card formula-card">
+  <div class="card-header"><h2>📐 Score Formula</h2></div>
+  <div class="card-body formula-body">
+    <div class="formula-display">
+      <div class="formula-part" style="--color:#06b6d4">
+        <span class="f-value">{{ resume.nlp_score|round(1) }}%</span>
+        <span class="f-weight">× 35%</span>
+        <span class="f-label">NLP</span>
+      </div>
+      <span class="f-plus">+</span>
+      <div class="formula-part" style="--color:#10b981">
+        <span class="f-value">{{ resume.ml_score|round(1) }}%</span>
+        <span class="f-weight">× 30%</span>
+        <span class="f-label">ML</span>
+      </div>
+      <span class="f-plus">+</span>
+      <div class="formula-part" style="--color:#f59e0b">
+        <span class="f-value">{{ resume.claude_score|round(1) }}%</span>
+        <span class="f-weight">× 35%</span>
+        <span class="f-label">Claude AI</span>
+      </div>
+      <span class="f-equals">=</span>
+      <div class="formula-part formula-result">
+        <span class="f-value">{{ resume.final_score|round(1) }}%</span>
+        <span class="f-label">Final Score</span>
+      </div>
+    </div>
+    <div class="model-badge">Model: {{ resume.model_version }} · Evaluator: {{ resume.evaluator_source|capitalize }}</div>
+  </div>
+</div>
+
+<!-- Skills Analysis -->
+<div class="two-col">
+  <div class="card">
+    <div class="card-header">
+      <h2>✅ Matched Skills</h2>
+      <span class="badge badge-success">{{ resume.matched_skills|length }} found</span>
+    </div>
+    <div class="card-body">
+      {% if resume.matched_skills %}
+        <div class="skills-wrap">
+          {% for skill in resume.matched_skills %}
+            <span class="skill-tag skill-matched">{{ skill }}</span>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="empty-text">No specific skills detected from skill database.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h2>❌ Missing Skills</h2>
+      <span class="badge badge-danger">{{ resume.missing_skills|length }} gaps</span>
+    </div>
+    <div class="card-body">
+      {% if resume.missing_skills %}
+        <div class="skills-wrap">
+          {% for skill in resume.missing_skills %}
+            <span class="skill-tag skill-missing">{{ skill }}</span>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="empty-text success-text">🎉 No critical skill gaps detected!</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- AI Insights -->
+<div class="two-col">
+  {% if resume.strengths %}
+  <div class="card">
+    <div class="card-header"><h2>💪 Strengths</h2></div>
+    <div class="card-body">
+      <ul class="insight-list insight-strengths">
+        {% for s in resume.strengths %}
+          <li><span class="insight-icon">✅</span> {{ s }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if resume.weaknesses %}
+  <div class="card">
+    <div class="card-header"><h2>⚠️ Areas for Improvement</h2></div>
+    <div class="card-body">
+      <ul class="insight-list insight-weaknesses">
+        {% for w in resume.weaknesses %}
+          <li><span class="insight-icon">⚠️</span> {{ w }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Suggestions -->
+{% if resume.improvement_suggestions %}
+<div class="card">
+  <div class="card-header"><h2>💡 Actionable Suggestions</h2></div>
+  <div class="card-body">
+    <div class="suggestions-grid">
+      {% for suggestion in resume.improvement_suggestions %}
+      <div class="suggestion-card">
+        <div class="suggestion-num">{{ loop.index }}</div>
+        <p>{{ suggestion }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Delete -->
+<div class="danger-zone">
+  <form method="POST" action="{{ url_for('dashboard.delete_resume', resume_id=resume._id) }}"
+        onsubmit="return confirm('Permanently delete this analysis?')">
+    <button type="submit" class="btn btn-danger-ghost btn-sm">🗑 Delete This Analysis</button>
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Add enumerate support in Jinja2 via JS workaround (already in template above using loop.index)
+</script>
+{% endblock %}

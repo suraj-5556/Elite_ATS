@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Welcome back, {{ current_user.name.split()[0] }} 👋</h1>
+    <p class="page-subtitle">Your resume performance at a glance</p>
+  </div>
+  <a href="{{ url_for('match.index') }}" class="btn btn-primary">+ Analyze Resume</a>
+</div>
+
+<!-- Stats Cards -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon">📄</div>
+    <div class="stat-body">
+      <div class="stat-value">{{ total }}</div>
+      <div class="stat-label">Resumes Analyzed</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">📈</div>
+    <div class="stat-body">
+      <div class="stat-value">{{ avg_score }}%</div>
+      <div class="stat-label">Average Score</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">✅</div>
+    <div class="stat-body">
+      <div class="stat-value">{{ shortlisted }}</div>
+      <div class="stat-label">Likely Shortlisted</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">🎯</div>
+    <div class="stat-body">
+      <div class="stat-value">
+        {% if total > 0 %}{{ ((shortlisted / total) * 100)|round(0)|int }}%{% else %}—{% endif %}
+      </div>
+      <div class="stat-label">Shortlist Rate</div>
+    </div>
+  </div>
+</div>
+
+<!-- Score Chart -->
+{% if resumes %}
+<div class="card">
+  <div class="card-header">
+    <h2>Score History</h2>
+    <div class="chart-legend">
+      <span class="legend-dot" style="background:#6366f1"></span>Final
+      <span class="legend-dot" style="background:#06b6d4"></span>NLP
+      <span class="legend-dot" style="background:#10b981"></span>ML
+      <span class="legend-dot" style="background:#f59e0b"></span>Claude
+    </div>
+  </div>
+  <div class="card-body">
+    <canvas id="scoreChart" height="100"></canvas>
+  </div>
+</div>
+{% endif %}
+
+<!-- Recent Analyses -->
+<div class="card">
+  <div class="card-header">
+    <h2>Recent Analyses</h2>
+    <a href="{{ url_for('dashboard.my_resumes') }}" class="btn btn-ghost btn-sm">View all →</a>
+  </div>
+  <div class="card-body">
+    {% if resumes %}
+    <div class="resume-table-wrapper">
+      <table class="resume-table">
+        <thead>
+          <tr>
+            <th>File</th>
+            <th>Final Score</th>
+            <th>NLP</th>
+            <th>ML</th>
+            <th>Claude</th>
+            <th>ATS</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in resumes[:10] %}
+          <tr>
+            <td class="filename-cell">
+              <span class="file-icon">📄</span>
+              <span title="{{ r.filename }}">{{ r.filename[:25] }}{% if r.filename|length > 25 %}…{% endif %}</span>
+            </td>
+            <td>
+              <div class="score-badge {% if r.final_score >= 70 %}score-high{% elif r.final_score >= 50 %}score-mid{% else %}score-low{% endif %}">
+                {{ r.final_score|round(1) }}%
+              </div>
+            </td>
+            <td class="score-cell">{{ r.nlp_score|round(1) }}%</td>
+            <td class="score-cell">{{ r.ml_score|round(1) }}%</td>
+            <td class="score-cell">{{ r.claude_score|round(1) }}%</td>
+            <td class="score-cell">{{ r.ats_score|round(1) }}%</td>
+            <td>
+              {% if r.shortlisting_probability >= 0.6 %}
+                <span class="badge badge-success">Shortlist ✓</span>
+              {% elif r.shortlisting_probability >= 0.4 %}
+                <span class="badge badge-warning">Possible</span>
+              {% else %}
+                <span class="badge badge-danger">Unlikely</span>
+              {% endif %}
+            </td>
+            <td class="date-cell">
+              {% if r.uploaded_at %}{{ r.uploaded_at.strftime('%b %d, %Y') }}{% endif %}
+            </td>
+            <td>
+              <div class="action-btns">
+                <a href="{{ url_for('match.results', resume_id=r._id) }}" class="btn btn-sm btn-ghost">View</a>
+                <form method="POST" action="{{ url_for('dashboard.delete_resume', resume_id=r._id) }}"
+                      onsubmit="return confirm('Delete this analysis?')" style="display:inline">
+                  <button type="submit" class="btn btn-sm btn-danger-ghost">Delete</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">🤖</div>
+      <h3>No analyses yet</h3>
+      <p>Upload your first resume to get AI-powered insights</p>
+      <a href="{{ url_for('match.index') }}" class="btn btn-primary">Analyze Resume</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

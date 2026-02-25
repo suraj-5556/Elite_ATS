@@ -1,24 +1,27 @@
-// Global utilities
-const navLinks = document.querySelectorAll('.nav-link');
-const currentPath = window.location.pathname;
+/**
+ * TalentAI - Main JavaScript
+ * Global utilities used across all pages.
+ */
 
-navLinks.forEach(link => {
-    if (link.getAttribute('href') === currentPath || 
-        (currentPath.startsWith(link.getAttribute('href')) && link.getAttribute('href') !== '/')) {
-        link.style.color = 'rgba(255,255,255,0.95)';
-        link.style.background = 'rgba(124, 58, 237, 0.15)';
-    }
+"use strict";
+
+// ── Auto-dismiss flash messages after 5s ───────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.flash').forEach(flash => {
+    setTimeout(() => flash.remove(), 5000);
+  });
 });
 
-// Intersection Observer for animations
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.classList.add('fade-in');
-        }
-    });
-}, { threshold: 0.1 });
+// ── Toggle password visibility ─────────────────────────────────
+function togglePassword(fieldId) {
+  const input = document.getElementById(fieldId);
+  if (!input) return;
+  input.type = input.type === 'password' ? 'text' : 'password';
+}
 
-document.querySelectorAll('.step-card, .tech-item, .stat-card, .job-card').forEach(el => {
-    observer.observe(el);
-});
+// ── Utility: Format file size ──────────────────────────────────
+function formatFileSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}

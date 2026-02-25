@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+
+{% block auth_content %}
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="logo-large">
+        <span class="logo-icon">🎯</span>
+        <span class="logo-text">TalentAI</span>
+      </div>
+      <h1>Create your account</h1>
+      <p>Start matching your resume to dream jobs today</p>
+    </div>
+
+    <form id="registerForm" method="POST" action="{{ url_for('auth.register') }}" novalidate>
+      <div class="form-group">
+        <label for="name">Full Name</label>
+        <input
+          type="text"
+          id="name"
+          name="name"
+          value="{{ name or '' }}"
+          placeholder="Jane Smith"
+          required
+          minlength="2"
+          autocomplete="name"
+        />
+        <span class="field-error" id="nameError"></span>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email address</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          value="{{ email or '' }}"
+          placeholder="jane@example.com"
+          required
+          autocomplete="email"
+        />
+        <span class="field-error" id="emailError"></span>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="input-with-toggle">
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="Min. 8 characters"
+            required
+            minlength="8"
+            autocomplete="new-password"
+          />
+          <button type="button" class="toggle-pw" onclick="togglePassword('password')">👁</button>
+        </div>
+        <div class="password-strength" id="pwStrength"></div>
+        <span class="field-error" id="passwordError"></span>
+      </div>
+
+      <div class="form-group">
+        <label for="confirm_password">Confirm Password</label>
+        <div class="input-with-toggle">
+          <input
+            type="password"
+            id="confirm_password"
+            name="confirm_password"
+            placeholder="Repeat your password"
+            required
+            autocomplete="new-password"
+          />
+          <button type="button" class="toggle-pw" onclick="togglePassword('confirm_password')">👁</button>
+        </div>
+        <span class="field-error" id="confirmError"></span>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-full" id="submitBtn">
+        <span class="btn-text">🚀 Create Account</span>
+        <span class="btn-loader" style="display:none">⏳ Creating account...</span>
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      <p>Already have an account? <a href="{{ url_for('auth.login') }}">Sign in</a></p>
+    </div>
+  </div>
+
+  <div class="auth-features">
+    <h2>AI-Powered Resume Screening</h2>
+    <div class="feature-list">
+      <div class="feature-item">
+        <span class="feature-icon">🤖</span>
+        <div>
+          <strong>Claude AI Analysis</strong>
+          <p>Deep semantic evaluation by advanced AI</p>
+        </div>
+      </div>
+      <div class="feature-item">
+        <span class="feature-icon">📊</span>
+        <div>
+          <strong>Multi-Model Scoring</strong>
+          <p>NLP + ML + AI for accurate match scores</p>
+        </div>
+      </div>
+      <div class="feature-item">
+        <span class="feature-icon">🎯</span>
+        <div>
+          <strong>ATS Optimization</strong>
+          <p>Ensure your resume passes screening systems</p>
+        </div>
+      </div>
+      <div class="feature-item">
+        <span class="feature-icon">🆓</span>
+        <div>
+          <strong>Free to Start</strong>
+          <p>No credit card required to get started</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+{% endblock %}

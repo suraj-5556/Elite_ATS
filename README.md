@@ -1,216 +1,297 @@
-# ⚡ TalentAI — AI Job Portal with Resume Matching
+# 🎯 TalentAI — AI-Powered Job Portal with Resume Screening
 
-> Full-stack AI-powered job portal built with Python, Flask, Traditional NLP, ML, and Claude AI
+> Production-ready AI SaaS application for intelligent resume matching using NLP, Machine Learning, and Claude AI.
 
----
-
-## 🚀 Quick Start
-
-### Option 1: Docker (Recommended)
-
-```bash
-# Build the image
-docker build -t ai-job-portal .
-
-# Run with your Claude API key
-docker run -p 5000:5000 \
-  -e ANTHROPIC_API_KEY=your-key-here \
-  ai-job-portal
-
-# Open http://localhost:5000
-```
-
-### Option 2: Local Development
-
-```bash
-# 1. Create virtual environment
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-
-# 2. Install dependencies
-pip install -r requirements.txt
-
-# 3. Download NLP models
-python -m nltk.downloader punkt stopwords punkt_tab
-
-# 4. Set your API key
-cp .env.example .env
-# Edit .env and add your ANTHROPIC_API_KEY
-
-# 5. Run
-python app.py
-
-# Open http://localhost:5000
-```
+![Python](https://img.shields.io/badge/Python-3.11-blue)
+![Flask](https://img.shields.io/badge/Flask-3.0-green)
+![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-brightgreen)
+![Claude](https://img.shields.io/badge/Claude-AI-purple)
+![MLflow](https://img.shields.io/badge/MLflow-MLOps-orange)
 
 ---
 
-## 🏗️ Project Structure
+## 🏗️ Architecture Overview
 
 ```
-job_portal_ml/
-│
-├── app/
-│   ├── routes/
-│   │   ├── main.py          # Landing & analyze pages
-│   │   ├── resume.py        # Resume upload API
-│   │   ├── jobs.py          # Job listings API
-│   │   ├── match.py         # Matching analysis API
-│   │   └── dashboard.py     # Dashboard & stats
-│   │
-│   ├── templates/
-│   │   ├── base.html        # Base layout with navbar
-│   │   ├── index.html       # Landing page
-│   │   ├── match.html       # Resume upload + JD input
-│   │   ├── results.html     # Analysis results
-│   │   ├── jobs.html        # Job listings
-│   │   └── dashboard.html   # User dashboard
-│   │
-│   ├── static/
-│   │   ├── css/main.css     # Dark glassmorphism UI
-│   │   └── js/              # Page-specific JS files
-│   │
-│   └── services/
-│       ├── resume_parser.py  # PDF/DOCX/TXT parsing
-│       ├── jd_parser.py      # Job description NLP
-│       ├── nlp_scorer.py     # TF-IDF + cosine similarity
-│       ├── ml_model.py       # Gradient Boosting model
-│       ├── claude_evaluator.py # Claude AI integration
-│       └── matcher.py        # Orchestration pipeline
-│
+TalentAI/
+├── app/                          # Flask application (Application Factory)
+│   ├── __init__.py               # create_app() factory
+│   ├── database.py               # MongoDB connection
+│   ├── models.py                 # User model (Flask-Login)
+│   ├── auth/                     # Auth blueprint
+│   │   ├── __init__.py
+│   │   └── routes.py             # /auth/register, /auth/login, /auth/logout
+│   ├── dashboard/                # Dashboard blueprint
+│   │   ├── __init__.py
+│   │   └── routes.py             # /dashboard, /dashboard/stats, /my-resumes
+│   ├── jobs/                     # Jobs blueprint
+│   │   ├── __init__.py
+│   │   └── routes.py             # /jobs
+│   ├── match/                    # Resume matching blueprint
+│   │   ├── __init__.py
+│   │   └── routes.py             # /match, /match/analyze, /match/results/<id>
+│   ├── ml/                       # AI/ML pipeline (core logic)
+│   │   ├── __init__.py
+│   │   ├── resume_parser.py      # PDF/DOCX/TXT text extraction
+│   │   ├── nlp_scorer.py         # TF-IDF cosine similarity (35%)
+│   │   ├── ml_scorer.py          # Gradient Boosting model (30%)
+│   │   ├── claude_evaluator.py   # Claude AI evaluation (35%)
+│   │   └── pipeline.py           # Orchestration + MLflow logging
+│   ├── templates/                # Jinja2 HTML templates
+│   └── static/                   # CSS, JS, uploads
+│       ├── css/main.css          # SaaS glassmorphism design
+│       └── js/                   # auth.js, dashboard.js, match.js
 ├── ml_models/
-│   ├── training/train.py    # MLflow training pipeline
-│   ├── inference/           # Saved models
-│   └── datasets/            # Training data (DVC)
-│
-├── uploads/                 # Temporary resume storage
-├── experiments/             # MLflow runs
-├── logs/                    # App & prediction logs
-│
-├── app.py                   # Flask entry point
+│   ├── training/train_model.py   # MLflow training script
+│   └── inference/gb_model.pkl   # Saved model (generated by training)
+├── run.py                        # Entry point
 ├── requirements.txt
 ├── Dockerfile
-├── .dockerignore
+├── docker-compose.yml
 └── .env.example
 ```
 
 ---
 
-## 🧠 AI Pipeline
+## 🤖 AI Screening Pipeline
 
 ```
 Resume (PDF/DOCX/TXT)
-        ↓
-  [Resume Parser]
-  spaCy + PyMuPDF + python-docx
-  → Skills, Experience, Education, Certifications
-        ↓
-  [JD Parser]
-  NLTK + Regex
-  → Required Skills, Keywords, Experience Requirements
-        ↓
-  [NLP Scorer]                    Weight: 35%
-  TF-IDF + Cosine Similarity
-  Keyword Density + Experience Match
-        ↓
-  [ML Model]                      Weight: 30%
-  Gradient Boosting Classifier
-  (Trained on 2000 synthetic samples)
-        ↓
-  [Claude AI Evaluator]           Weight: 35%
-  claude-sonnet-4-20250514
-  Shortlisting probability + Suggestions
-        ↓
-  FINAL MATCH SCORE (0-100%)
+       ↓
+ Resume Parser (PyMuPDF, python-docx)
+       ↓
+ JD Parser (NLTK + regex)
+       ↓
+ NLP Scorer (TF-IDF + cosine similarity)  ──→ 35% weight
+       ↓
+ ML Model (Gradient Boosting, 7 features) ──→ 30% weight
+       ↓
+ Claude AI Evaluator (Anthropic API)      ──→ 35% weight
+       ↓
+ Final Score = NLP×0.35 + ML×0.30 + Claude×0.35
+       ↓
+ ATS Score + Shortlisting Probability + Suggestions
 ```
 
 ---
 
-## 📊 Output
+## 🚀 Quick Start (Local)
 
-- **Match Score**: Composite 0-100% from NLP + ML + Claude AI
-- **ATS Score**: Keyword density for Applicant Tracking Systems
-- **Shortlisting Probability**: High / Medium / Low
-- **Matched Skills**: Skills present in both resume and JD
-- **Missing Skills**: Required skills not in resume
-- **Improvement Suggestions**: Actionable recommendations
-- **Interview Likelihood**: AI-estimated probability
+### Prerequisites
+- Python 3.11+
+- MongoDB Atlas account (free tier works) or local MongoDB
+- Anthropic API key (optional — falls back to rule-based evaluator)
 
----
-
-## 🛠️ Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Backend | Python 3.11, Flask 3.0 |
-| Resume Parsing | PyMuPDF, python-docx, NLTK |
-| NLP | TF-IDF, Cosine Similarity, spaCy |
-| ML Model | Scikit-learn, Gradient Boosting |
-| AI Evaluation | Anthropic Claude (claude-sonnet-4) |
-| MLOps | MLflow |
-| Frontend | HTML5, CSS3 (Glassmorphism), Vanilla JS |
-| Deployment | Docker |
-
----
-
-## 🤖 MLflow Training
+### 1. Clone & Install
 
 ```bash
-# Run the training pipeline manually
-python ml_models/training/train.py
+git clone https://github.com/yourusername/talentai.git
+cd talentai
 
-# View MLflow dashboard
-mlflow ui --backend-store-uri experiments/mlruns
-# Open http://localhost:5000
+python -m venv venv
+source venv/bin/activate        # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+### 2. Configure Environment
+
+```bash
+cp .env.example .env
+# Edit .env with your values:
+nano .env
+```
+
+Required settings:
+```env
+SECRET_KEY=your-secure-random-string-here
+MONGODB_URI=mongodb+srv://<user>:<pass>@cluster0.xxxxx.mongodb.net/talentai
+ANTHROPIC_API_KEY=sk-ant-...   # Optional but recommended
+```
+
+### 3. Train the ML Model
+
+```bash
+python -m ml_models.training.train_model
+```
+
+This creates `ml_models/inference/gb_model.pkl` and logs metrics to MLflow.
+
+### 4. Run the Application
+
+```bash
+python run.py
+```
+
+Open **http://localhost:5000** — you'll be redirected to login.
+
+### 5. View MLflow Dashboard (Optional)
+
+```bash
+mlflow ui --backend-store-uri ./mlruns
+# Open http://localhost:5000 (default MLflow port)
 ```
 
 ---
 
-## 🔑 Environment Variables
+## 🐳 Docker Deployment
+
+### Single container
+
+```bash
+docker build -t talentai .
+docker run -p 5000:5000 \
+  -e SECRET_KEY=change-me \
+  -e MONGODB_URI=mongodb+srv://... \
+  -e ANTHROPIC_API_KEY=sk-ant-... \
+  talentai
+```
+
+### Full stack with MLflow UI
+
+```bash
+cp .env.example .env
+# Fill in your MONGODB_URI and ANTHROPIC_API_KEY in .env
+
+docker-compose up --build
+```
+
+Services:
+- **TalentAI app**: http://localhost:5000
+- **MLflow UI**: http://localhost:5001
+
+---
+
+## 📊 MLflow Tracking
+
+Every prediction is logged to MLflow:
+- `nlp_score`, `ml_score`, `claude_score`, `final_score`
+- `latency_seconds` — pipeline execution time
+- `model_version` — which model was used
+- `nlp_weight`, `ml_weight`, `claude_weight` — ensemble weights
+
+Training logs:
+- Accuracy, Precision, Recall, F1, ROC-AUC
+- Cross-validation scores (5-fold)
+- Feature importances
+
+---
+
+## 🔒 Security Features
+
+- **Password hashing** — Werkzeug PBKDF2-SHA256
+- **Session management** — Flask-Login with server-side sessions
+- **Ownership enforcement** — Users can only access their own resumes
+- **Input validation** — Both client-side (JS) and server-side (Python)
+- **File validation** — Extension whitelist + 10MB size limit
+- **Environment variables** — No secrets in code
+- **Secure filename** — `werkzeug.utils.secure_filename`
+
+---
+
+## 🗃️ MongoDB Schema
+
+### Collection: `users`
+```json
+{
+  "_id": "ObjectId",
+  "name": "Jane Smith",
+  "email": "jane@example.com",
+  "password_hash": "pbkdf2:sha256:...",
+  "created_at": "ISODate"
+}
+```
+
+### Collection: `resumes`
+```json
+{
+  "_id": "ObjectId",
+  "user_id": "string",
+  "filename": "resume.pdf",
+  "resume_text": "...",
+  "job_description": "...",
+  "nlp_score": 72.4,
+  "ml_score": 68.1,
+  "claude_score": 74.5,
+  "final_score": 71.8,
+  "ats_score": 65.2,
+  "shortlisting_probability": 0.71,
+  "matched_skills": ["python", "flask", "mongodb"],
+  "missing_skills": ["kubernetes", "terraform"],
+  "improvement_suggestions": ["..."],
+  "strengths": ["..."],
+  "weaknesses": ["..."],
+  "uploaded_at": "ISODate",
+  "model_version": "gb_v1.0",
+  "pipeline_latency_ms": 4500
+}
+```
+
+---
+
+## 🌐 Routes Reference
+
+| Method | Route | Auth | Description |
+|--------|-------|------|-------------|
+| GET/POST | `/auth/register` | No | User registration |
+| GET/POST | `/auth/login` | No | User login |
+| GET | `/auth/logout` | Yes | Logout |
+| GET | `/dashboard` | Yes | Personal analytics |
+| GET | `/dashboard/stats` | Yes | JSON chart data |
+| POST | `/dashboard/delete/<id>` | Yes | Delete resume |
+| GET | `/my-resumes` | Yes | All user resumes |
+| GET | `/jobs` | Yes | Browse job listings |
+| GET | `/match/` | Yes | Upload form |
+| POST | `/match/analyze` | Yes | Run AI analysis |
+| GET | `/match/results/<id>` | Yes | View results |
+
+---
+
+## 📦 Key Dependencies
+
+| Package | Purpose |
+|---------|---------|
+| Flask | Web framework |
+| Flask-Login | Session/auth management |
+| Werkzeug | Password hashing, file utils |
+| PyMongo | MongoDB driver |
+| PyMuPDF | PDF text extraction |
+| python-docx | DOCX text extraction |
+| scikit-learn | TF-IDF + Gradient Boosting |
+| anthropic | Claude AI API client |
+| mlflow | Model tracking & MLOps |
+| gunicorn | Production WSGI server |
+
+---
+
+## 🔧 Configuration
+
+All config via environment variables (see `.env.example`):
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `ANTHROPIC_API_KEY` | Yes | Claude AI API key |
-| `SECRET_KEY` | No | Flask secret (auto-generated) |
-| `FLASK_DEBUG` | No | Enable debug mode |
-
-**Without an API key**, the portal still works using a rule-based fallback evaluator.
-
----
-
-## 📁 API Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/` | Landing page |
-| GET | `/jobs/` | Job listings |
-| GET | `/match/` | Analysis form |
-| POST | `/match/analyze` | Run resume analysis |
-| GET | `/match/results` | Results page |
-| GET | `/dashboard/` | User dashboard |
-| GET | `/dashboard/api/stats` | Stats JSON |
-| GET | `/jobs/api/list` | Jobs JSON |
+| `SECRET_KEY` | ✅ | Flask session secret |
+| `MONGODB_URI` | ✅ | MongoDB Atlas connection string |
+| `ANTHROPIC_API_KEY` | ⚠️ Optional | Claude API (falls back to rules) |
+| `FLASK_DEBUG` | No | Set to 0 in production |
+| `PORT` | No | Default 5000 |
+| `MLFLOW_TRACKING_URI` | No | Default ./mlruns |
 
 ---
 
-## 🐳 Docker Commands
+## 🤝 Contributing
 
-```bash
-# Build
-docker build -t ai-job-portal .
+1. Fork the repo
+2. Create a feature branch
+3. Follow existing code patterns (blueprints, factory pattern)
+4. Add tests in `/tests`
+5. Submit a PR
 
-# Run with API key
-docker run -p 5000:5000 -e ANTHROPIC_API_KEY=sk-ant-xxx ai-job-portal
+---
 
-# Run with .env file
-docker run -p 5000:5000 --env-file .env ai-job-portal
+## 📄 License
 
-# Run detached
-docker run -d -p 5000:5000 --env-file .env --name talentai ai-job-portal
+MIT License — see LICENSE file.
 
-# View logs
-docker logs talentai -f
+---
 
-# Stop
-docker stop talentai
-```
+*Built with ❤️ using Flask, MongoDB, scikit-learn, and Anthropic Claude*

@@ -1,0 +1,24 @@
+{# ──────────────────────────────────────────────────────────────────────────
+   Paste this <nav> block snippet into your base.html
+   Replace or extend your existing navbar with this section.
+   ────────────────────────────────────────────────────────────────────────── #}
+
+{# 1. Add this line in the <head> AFTER your existing CSS links: #}
+{# <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}"> #}
+
+{# 2. In your <nav> or header, replace the right-side links with: #}
+
+<div class="nav-auth">
+  {% if current_user.is_authenticated %}
+    <a href="{{ url_for('auth.profile') }}" class="nav-link">
+      <span class="avatar-circle" style="width:32px;height:32px;font-size:.9rem;display:inline-flex;">
+        {{ current_user.name[0].upper() }}
+      </span>
+      {{ current_user.name.split()[0] }}
+    </a>
+    <a href="{{ url_for('auth.logout') }}" class="btn btn-outline btn-sm">Log Out</a>
+  {% else %}
+    <a href="{{ url_for('auth.login') }}"    class="nav-link">Login</a>
+    <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-sm">Sign Up</a>
+  {% endif %}
+</div>

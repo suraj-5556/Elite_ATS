@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - SECRET_KEY=${SECRET_KEY:-change-in-production}
+      - MONGODB_URI=${MONGODB_URI:-mongodb://localhost:27017/talentai}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - FLASK_ENV=${FLASK_ENV:-production}
+      - FLASK_DEBUG=0
+      - MLFLOW_TRACKING_URI=./mlruns
+    volumes:
+      - uploads_data:/app/app/static/uploads
+      - mlflow_data:/app/mlruns
+      - model_data:/app/ml_models/inference
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/auth/login"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  mlflow:
+    image: python:3.11-slim
+    command: >
+      sh -c "pip install mlflow && mlflow ui --host 0.0.0.0 --port 5001 --backend-store-uri /mlruns"
+    ports:
+      - "5001:5001"
+    volumes:
+      - mlflow_data:/mlruns
+    restart: unless-stopped
+
+volumes:
+  uploads_data:
+  mlflow_data:
+  model_data:

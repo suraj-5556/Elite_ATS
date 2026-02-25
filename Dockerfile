@@ -1,46 +1,49 @@
-# AI Job Portal - Production Dockerfile
-FROM python:3.11-slim
+# ── Stage 1: Build ────────────────────────────────────────────
+FROM python:3.11-slim AS base
 
-LABEL maintainer="AI Job Portal"
-LABEL description="AI-powered resume matching portal with Flask, ML, and Claude AI"
-
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    FLASK_ENV=production
+# Install system dependencies for PyMuPDF, python-docx
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    g++ \
+    libffi-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-
-# Copy and install Python dependencies
+# ── Install Python dependencies ────────────────────────────────
 COPY requirements.txt .
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Download NLTK data
-RUN python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords'); nltk.download('punkt_tab')"
+RUN python -c "import nltk; nltk.download('stopwords'); nltk.download('punkt'); nltk.download('wordnet')"
 
-# Copy application files
+# Download spaCy model
+RUN python -m spacy download en_core_web_sm || echo "spaCy model download failed (non-critical)"
+
+# ── Copy Application ───────────────────────────────────────────
 COPY . .
 
-# Create necessary directories
-RUN mkdir -p uploads logs experiments ml_models/inference ml_models/training ml_models/datasets
+# Create upload directory
+RUN mkdir -p app/static/uploads ml_models/inference mlruns
 
-# Pre-train ML model
-RUN python -c "from app.services.ml_model import load_or_train_model; load_or_train_model()" || true
+# ── Train ML model at build time ───────────────────────────────
+# This ensures the model exists in the container. In production,
+# mount a pre-trained model volume instead.
+RUN python -m ml_models.training.train_model || echo "Model training skipped (MongoDB not available at build)"
 
-# Create non-root user for security
-RUN useradd --create-home --shell /bin/bash appuser && \
-    chown -R appuser:appuser /app
+# ── Non-root user for security ─────────────────────────────────
+RUN useradd --create-home --shell /bin/bash appuser
+RUN chown -R appuser:appuser /app
 USER appuser
 
-# Expose port
+# ── Expose and run ─────────────────────────────────────────────
 EXPOSE 5000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD curl -f http://localhost:5000/ || exit 1
-
-# Run application with gunicorn for production
-CMD ["python", "app.py"]
+# Use gunicorn for production; 4 workers for concurrency
+CMD ["gunicorn", \
+     "--bind", "0.0.0.0:5000", \
+     "--workers", "4", \
+     "--timeout", "120", \
+     "--access-logfile", "-", \
+     "--error-logfile", "-", \
+     "run:app"]
